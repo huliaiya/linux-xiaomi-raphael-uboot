@@ -79,6 +79,14 @@ for pkg in $EXTRA_PACKAGES; do
     chroot rootdir apt-get install -y "$pkg" 2>/dev/null || echo "⚠️ $pkg 安装失败，跳过"
 done
 
+# 安装并配置开机动画 (Plymouth + Solar 主题)
+echo "[$(date +'%Y-%m-%d %H:%M:%S')]   └─ 安装开机动画主题 (Plymouth Solar)"
+chroot rootdir apt-get install -y plymouth plymouth-themes 2>/dev/null || echo "⚠️ plymouth 安装失败，跳过"
+if chroot rootdir which plymouth-set-default-theme >/dev/null 2>&1; then
+    chroot rootdir plymouth-set-default-theme -R solar 2>/dev/null || echo "⚠️ solar 主题设置失败"
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')]   ✅ Plymouth 主题已设置为: solar"
+fi
+
 # 安装星火应用商店
 echo "[$(date + '%Y-%m-%d %H:%M:%S')]   └─ 安装星火应用商店"
 wget -qO /tmp/spark-key.gpg "https://spark-store.io/spark-store-archive-keyring.gpg" 2>/dev/null || true
