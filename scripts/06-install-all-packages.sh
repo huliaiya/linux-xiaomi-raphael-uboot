@@ -41,7 +41,7 @@ if [[ "$SYSTEM_TYPE" != *"server"* ]]; then
             DESKTOP_PACKAGES="phosh-core"
             ;;
         "phosh-full")
-            DESKTOP_PACKAGES="phosh-full firefox-esr nautilus gnome-calculator gnome-screenshot geary evince eog gnome-text-editor gnome-calendar gnome-weather gnome-maps gnome-notes gnome-software file-roller baobab gnome-contacts gnome-photos"
+            DESKTOP_PACKAGES="phosh-full nautilus gnome-calculator gnome-screenshot geary evince eog gnome-text-editor gnome-calendar gnome-weather gnome-maps gnome-notes gnome-software file-roller baobab gnome-contacts "
             ;;
         "phosh-phone")
             DESKTOP_PACKAGES="phosh-phone"
