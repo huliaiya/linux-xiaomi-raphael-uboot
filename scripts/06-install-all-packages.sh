@@ -10,6 +10,13 @@ echo "[$(date +'%Y-%m-%d %H:%M:%S')] 📦 安装软件包"
 
 export DEBIAN_FRONTEND=noninteractive
 
+echo "[$(date +'%Y-%m-%d %H:%M:%S')]   └─ 添加 Mozilla PPA 源 (for firefox-esr)"
+wget -qO /tmp/mozillateam.asc "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x0ab215679c571d1c8325275b9ddba6d8d810a263" 2>/dev/null || true
+if [ -s /tmp/mozillateam.asc ]; then
+    gpg --dearmor < /tmp/mozillateam.asc > rootdir/etc/apt/trusted.gpg.d/mozillateam.gpg 2>/dev/null || true
+    echo "deb [signed-by=/etc/apt/trusted.gpg.d/mozillateam.gpg] https://ppa.launchpadcontent.net/mozillateam/ppa/ubuntu noble main" > rootdir/etc/apt/sources.list.d/mozillateam-ppa.list
+fi
+
 echo "[$(date +'%Y-%m-%d %H:%M:%S')]   └─ 更新系统包..."
 chroot rootdir apt-get update
 chroot rootdir apt-get upgrade -y
@@ -41,7 +48,7 @@ if [[ "$SYSTEM_TYPE" != *"server"* ]]; then
             DESKTOP_PACKAGES="phosh-core"
             ;;
         "phosh-full")
-            DESKTOP_PACKAGES="phosh-full nautilus gnome-calculator gnome-screenshot geary evince eog gnome-text-editor gnome-calendar gnome-weather gnome-maps gnome-notes gnome-software file-roller baobab gnome-contacts "
+            DESKTOP_PACKAGES="phosh-full"
             ;;
         "phosh-phone")
             DESKTOP_PACKAGES="phosh-phone"
@@ -64,6 +71,13 @@ fi
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S')]   └─ 开始安装（这可能需要几分钟...）"
 chroot rootdir apt-get install -y $ALL_PACKAGES
+
+# 安装额外应用（容错，一个失败不影响其他）
+echo "[$(date +'%Y-%m-%d %H:%M:%S')]   └─ 安装额外应用"
+EXTRA_PACKAGES="firefox-esr nautilus gnome-calculator gnome-screenshot geary evince eog gnome-text-editor gnome-calendar gnome-weather gnome-maps gnome-notes gnome-software file-roller baobab loupe"
+for pkg in $EXTRA_PACKAGES; do
+    chroot rootdir apt-get install -y "$pkg" 2>/dev/null || echo "⚠️ $pkg 安装失败，跳过"
+done
 
 # 安装星火应用商店
 echo "[$(date + '%Y-%m-%d %H:%M:%S')]   └─ 安装星火应用商店"
