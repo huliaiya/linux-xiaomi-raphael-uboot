@@ -41,7 +41,7 @@ if [[ "$SYSTEM_TYPE" != *"server"* ]]; then
             DESKTOP_PACKAGES="phosh-core"
             ;;
         "phosh-full")
-            DESKTOP_PACKAGES="phosh-full firefox-esr nautilus gnome-calculator gnome-screenshot geary"
+            DESKTOP_PACKAGES="phosh-full firefox-esr nautilus gnome-calculator gnome-screenshot geary evince eog gnome-text-editor gnome-calendar gnome-weather gnome-maps gnome-notes gnome-software file-roller baobab gnome-contacts gnome-photos"
             ;;
         "phosh-phone")
             DESKTOP_PACKAGES="phosh-phone"
@@ -64,6 +64,18 @@ fi
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S')]   └─ 开始安装（这可能需要几分钟...）"
 chroot rootdir apt-get install -y $ALL_PACKAGES
+
+# 安装星火应用商店
+echo "[$(date + '%Y-%m-%d %H:%M:%S')]   └─ 安装星火应用商店"
+wget -qO /tmp/spark-key.gpg "https://spark-store.io/spark-store-archive-keyring.gpg" 2>/dev/null || true
+if [ -s /tmp/spark-key.gpg ]; then
+    cp /tmp/spark-key.gpg rootdir/usr/share/keyrings/spark-store-archive-keyring.gpg
+    echo "deb [arch=arm64 signed-by=/usr/share/keyrings/spark-store-archive-keyring.gpg] https://mirrors.sjtug.sjtu.edu.cn/spark-store/debian/ stable main" > rootdir/etc/apt/sources.list.d/spark-store.list
+    chroot rootdir apt-get update 2>/dev/null || true
+    chroot rootdir apt-get install -y spark-store 2>/dev/null || echo "⚠️ 星火应用商店安装失败，可稍后手动安装"
+else
+    echo "⚠️ 星火应用商店密钥下载失败，跳过"
+fi
 
 # 修改服务配置
 sed -i '/ConditionKernelVersion/d' rootdir/lib/systemd/system/pd-mapper.service 2>/dev/null || true
