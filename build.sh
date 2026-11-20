@@ -76,6 +76,19 @@ if [ ! -d "$KERNEL_DEBS_DIR" ]; then
     exit 1
 fi
 
+cleanup_on_exit() {
+    local exit_code=$?
+    trap - EXIT
+    if ! cleanup_build; then
+        echo "[$(date +'%Y-%m-%d %H:%M:%S')] ❌ 镜像挂载或 loop 设备清理失败，请检查挂载状态"
+        if [ "$exit_code" -eq 0 ]; then
+            exit_code=1
+        fi
+    fi
+    exit "$exit_code"
+}
+trap cleanup_on_exit EXIT
+
 chmod +x "$SCRIPT_DIR/scripts"/*.sh
 
 echo ""

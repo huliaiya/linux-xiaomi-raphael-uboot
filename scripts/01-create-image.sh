@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+SCRIPT_DIR="${SCRIPT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+. "$SCRIPT_DIR/config/build-config.sh"
+
 IMAGE_SIZE="${IMAGE_SIZE:-3G}"
 IMAGE_NAME="${IMAGE_NAME:-rootfs.img}"
 IMAGE_UUID="${IMAGE_UUID:-ee8d3593-59b1-480e-a3b6-4fefb17ee7d8}"
@@ -15,8 +18,9 @@ BOOT_VOLID="${BOOT_VOLID:-1BF4A32B}"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S')] 📦 创建 GPT 根文件系统镜像 (${IMAGE_SIZE}, boot: ${BOOT_SIZE})"
 
-# 0. 清理残留 loop 与旧镜像 (truncate 不清空, 旧 loop 延迟写回会污染新分区/新文件系统)
-losetup -D 2>/dev/null || true
+# 0. 清理当前镜像的残留挂载和 loop；确认安全后才能删除旧目录和镜像。
+cleanup_build
+rm -rf --one-file-system rootdir
 rm -f ${IMAGE_NAME}
 
 # 1. 创建空镜像文件

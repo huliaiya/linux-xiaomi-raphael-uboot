@@ -26,7 +26,11 @@ elif [[ "$SYSTEM_TYPE" == *"ubuntu-"* ]]; then
     fi
 fi
 
-DEVICE_PACKAGES="rmtfs protection-domain-mapper tqftpserv qrtr-tools libqmi-utils hexagonrpcd"
+DEVICE_PACKAGES="rmtfs protection-domain-mapper tqftpserv qrtr-tools libqmi-utils"
+# Ubuntu Noble 没有 hexagonrpcd，下面通过隔离的 Ubuntu 索引安装兼容包。
+if [[ "$SYSTEM_TYPE" != *"ubuntu-"* || "$UBUNTU_VERSION" != "noble" ]]; then
+    DEVICE_PACKAGES="$DEVICE_PACKAGES hexagonrpcd"
+fi
 
 if [[ "$SYSTEM_TYPE" != *"server"* ]]; then
     case "$DESKTOP_ENV" in
@@ -65,6 +69,30 @@ fi
 echo "[$(date +'%Y-%m-%d %H:%M:%S')]   └─ 开始安装（这可能需要几分钟...）"
 chroot rootdir apt-get install -y $ALL_PACKAGES parted
 
+if [[ "$SYSTEM_TYPE" == *"ubuntu-"* && "$UBUNTU_VERSION" == "noble" ]]; then
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')]   └─ Noble 无 hexagonrpcd，安装 Ubuntu Resolute 兼容包"
+    ROOT_DIR=$(readlink -f rootdir)
+    HEXAGON_DIR="$ROOT_DIR/tmp/hexagonrpcd-ubuntu"
+    mkdir -p "$HEXAGON_DIR/lists/partial" "$HEXAGON_DIR/cache/archives/partial"
+    echo "deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://ports.ubuntu.com/ubuntu-ports resolute universe" > "$HEXAGON_DIR/sources.list"
+
+    # 索引、缓存和源配置均隔离在临时目录，不污染 Noble 的 apt 配置。
+    APT_OPTIONS=(
+        -o "Dir::Etc::sourcelist=$HEXAGON_DIR/sources.list"
+        -o "Dir::Etc::sourceparts=-"
+        -o "Dir::State::lists=$HEXAGON_DIR/lists"
+        -o "Dir::Cache=$HEXAGON_DIR/cache"
+        -o "APT::Get::List-Cleanup=0"
+    )
+    apt-get "${APT_OPTIONS[@]}" update
+    (
+        cd "$HEXAGON_DIR"
+        apt-get "${APT_OPTIONS[@]}" download hexagonrpcd libhexagonrpc0.4
+    )
+    chroot rootdir bash -c 'apt-get install -y --no-install-recommends /tmp/hexagonrpcd-ubuntu/libhexagonrpc0.4_*.deb /tmp/hexagonrpcd-ubuntu/hexagonrpcd_*.deb'
+    rm -rf "$HEXAGON_DIR"
+fi
+
 echo "[$(date +'%Y-%m-%d %H:%M:%S')]   └─ 安装 systemd-boot (U-Boot 引导链)"
 chroot rootdir bash -c 'apt-get install -y systemd-boot-efi 2>/dev/null || apt-get install -y systemd-boot 2>/dev/null || true'
 
@@ -81,6 +109,10 @@ chroot rootdir systemctl enable msm-modem-uim-selection 2>/dev/null || true
 
 # hexagonrpcd（SDSP 传感器守护进程）：固定 sdsp 设备、附加 sensorspd、崩溃自动重启
 # 直接调用真实二进制，绕开 wrapper 默认的 -R /var/lib/droid-juicer/sensors/ 参数
+if [ ! -x rootdir/usr/libexec/hexagonrpc/hexagonrpcd ] || [ ! -f rootdir/usr/lib/systemd/system/hexagonrpcd.service ]; then
+    echo "hexagonrpcd 二进制或 systemd 服务缺失，无法完成传感器配置" >&2
+    exit 1
+fi
 mkdir -p rootdir/etc/systemd/system/hexagonrpcd.service.d/
 cat > rootdir/etc/systemd/system/hexagonrpcd.service.d/sdsp.conf <<EOF
 [Service]
@@ -92,7 +124,7 @@ EOF
 # 尽早启动 hexagonrpcd（移除 After=multi-user.target），
 # 避免被 UIM 阻塞拖到 SLPI 看门狗窗口之外（SLPI sensor_process 停滞崩溃）
 sed -i '/^After=multi-user.target$/d' rootdir/usr/lib/systemd/system/hexagonrpcd.service 2>/dev/null || true
-chroot rootdir systemctl enable hexagonrpcd 2>/dev/null || true
+chroot rootdir systemctl enable hexagonrpcd
 # 固件已内置在镜像中，无需 droid-juicer 提取
 chroot rootdir systemctl mask droid-juicer 2>/dev/null || true
 
