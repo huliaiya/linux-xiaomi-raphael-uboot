@@ -2,7 +2,7 @@
 set -e
 
 ROOT_PASS="${ROOT_PASS:-1234}"
-USER_NAME="${USER_NAME:-user}"
+USER_NAME="${USER_NAME:-huliboot}"
 USER_PASS="${USER_PASS:-1234}"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S')] 👤 创建用户和配置 SSH"

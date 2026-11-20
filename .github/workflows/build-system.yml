@@ -48,7 +48,10 @@ on:
         type: string
 
 env:
-  HOSTNAME: xiaomi-raphael
+  HOSTNAME: huliboot
+  DEVICE_NAME: huliboot
+  DEVICE_MODEL: huliboot
+  USER_NAME: huliboot
 
 permissions:
   contents: write
@@ -157,7 +160,6 @@ jobs:
     needs: generate-matrix
     name: ${{ format('构建 {0}-{1}', matrix.system_type, matrix.kernel_version) }}
     runs-on: ubuntu-24.04-arm
-    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
@@ -236,6 +238,8 @@ jobs:
           sudo env SYSTEM_TYPE="${{ env.SYSTEM_TYPE }}" KERNEL_VERSION="${{ env.KERNEL_VERSION }}" \
             DEBIAN_VERSION="${{ env.DEBIAN_VERSION }}" UBUNTU_VERSION="${{ env.UBUNTU_VERSION }}" \
             BOOTSTRAP_TOOL="${{ env.BOOTSTRAP_TOOL }}" DESKTOP_ENV="${{ env.DESKTOP_ENV }}" \
+            HOSTNAME="${{ env.HOSTNAME }}" DEVICE_NAME="${{ env.DEVICE_NAME }}" \
+            DEVICE_MODEL="${{ env.DEVICE_MODEL }}" USER_NAME="${{ env.USER_NAME }}" \
             bash build.sh "${{ env.SYSTEM_TYPE }}" "${{ env.KERNEL_VERSION }}"
 
       - name: 生成产物文件名和校验和
@@ -249,10 +253,6 @@ jobs:
           echo "filename=${FILENAME}" >> $GITHUB_OUTPUT
           echo "artifact_name=${FILENAME}" >> $GITHUB_OUTPUT
           
-          # 生成校验和文件
-          sha256sum rootfs.img > ${FILENAME}.sha256
-          cat ${FILENAME}.sha256
-          
           # 记录文件大小
           ROOTFS_SIZE=$(stat -c%s rootfs.img)
           echo "rootfs_size=${ROOTFS_SIZE}" >> $GITHUB_OUTPUT
@@ -262,7 +262,10 @@ jobs:
           FILENAME="${{ steps.artifacts.outputs.filename }}"
           echo "压缩为 ${FILENAME}.7z ..."
           7z a "${FILENAME}.7z" rootfs.img
-          ls -lh "${FILENAME}.7z"
+          # 校验和必须对应实际上传的压缩包，而不是压缩前的 rootfs.img
+          sha256sum "${FILENAME}.7z" > "${FILENAME}.sha256"
+          cat "${FILENAME}.sha256"
+          ls -lh "${FILENAME}.7z" "${FILENAME}.sha256"
           # 压缩成功后删除源镜像, 防止 runner 磁盘峰值超限
           rm -f rootfs.img
 
@@ -334,12 +337,18 @@ jobs:
             filename=$(basename "$file")
             filesize=$(stat -c%s "$file")
 
-            # 解析文件名信息
-            # 格式: rootfs-{system_type}-{kernel_version}-{os_version}[-{desktop_env}].7z
-            IFS='-' read -ra PARTS <<< "${filename%.7z}"
-            SYSTEM_TYPE="${PARTS[1]}"
-            KERNEL_VER="${PARTS[2]}"
-            OS_VER="${PARTS[3]}"
+            # 从文件名末尾解析，兼容 system_type 和桌面环境中的连字符
+            base="${filename%.7z}"
+            base="${base#rootfs-}"
+            case "$base" in
+              *-phosh-core|*-phosh-full|*-phosh-phone)
+                base="${base%-phosh-*}"
+                ;;
+            esac
+            OS_VER="${base##*-}"
+            base="${base%-*}"
+            KERNEL_VER="${base##*-}"
+            SYSTEM_TYPE="${base%-*}"
 
             # 获取校验和
             shafile="${file%.7z}.sha256"
@@ -400,7 +409,7 @@ jobs:
           
           {
             echo "body<<EOF"
-            echo "## 小米 Raphael (K20 Pro) 系统镜像集合"
+            echo "## huliboot 系统镜像集合"
             echo ""
             echo "> 自动构建版本 - ${TIMESTAMP}"
             echo ""
@@ -421,12 +430,12 @@ jobs:
               echo ""
             fi
             echo "### 🔑 默认凭据"
-            echo "- **用户**: \`user\` / **密码**: \`1234\`"
+            echo "- **用户**: \`huliboot\` / **密码**: \`1234\`"
             echo "- **用户**: \`root\` / **密码**: \`1234\`"
             echo ""
             echo "### 🌐 网络连接 (USB NCM)"
             echo "- 设备 IP: \`172.16.42.1\`"
-            echo "- SSH 命令: \`ssh user@172.16.42.1\`"
+            echo "- SSH 命令: \`ssh huliboot@172.16.42.1\`"
             echo ""
             echo "---"
             echo "*Built with ❤️ by GitHub Actions*"

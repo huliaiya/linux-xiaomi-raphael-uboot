@@ -5,7 +5,7 @@ set -e
 # 解析参数
 SYSTEM_TYPE="${1:?请指定系统类型}"
 KERNEL_VERSION="${2:-7.3}"
-DESKTOP_ENV="${3:-phosh-full}"
+DESKTOP_ENV="${3:-${DESKTOP_ENV:-phosh-full}}"
 
 # 解析发行版版本参数
 if [[ "$SYSTEM_TYPE" == *"debian-"* ]]; then
@@ -39,7 +39,10 @@ export KERNEL_VERSION
 export DESKTOP_ENV
 export IMAGE_NAME="rootfs.img"
 export IMAGE_UUID="ee8d3593-59b1-480e-a3b6-4fefb17ee7d8"
-export HOSTNAME="xiaomi-raphael"
+export HOSTNAME="huliboot"
+export DEVICE_NAME="${DEVICE_NAME:-huliboot}"
+export DEVICE_MODEL="${DEVICE_MODEL:-huliboot}"
+export USER_NAME="${USER_NAME:-huliboot}"
 export KERNEL_DEBS_DIR="xiaomi-raphael-debs_$KERNEL_VERSION"
 
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"

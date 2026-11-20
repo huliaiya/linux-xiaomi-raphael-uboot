@@ -3,6 +3,7 @@ set -e
 
 SYSTEM_TYPE="${SYSTEM_TYPE:-ubuntu-server}"
 IMAGE_UUID="${IMAGE_UUID:-ee8d3593-59b1-480e-a3b6-4fefb17ee7d8}"
+DEVICE_MODEL="${DEVICE_MODEL:-huliboot}"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S')] 🧹 清理临时文件"
 
@@ -44,9 +45,9 @@ if [ -d "rootdir/usr/lib/linux-image-${KVER}/qcom" ]; then
     cp -rf "rootdir/usr/lib/linux-image-${KVER}/qcom/." rootdir/boot/dtbs/qcom/
 fi
 # 固定引导条目 (与设备更新后一致, 无需重建)
-TITLE=$(chroot rootdir sh -c '. /etc/os-release; echo "$PRETTY_NAME"' 2>/dev/null || echo "xiaomi-raphael")
+TITLE=$(chroot rootdir sh -c '. /etc/os-release; echo "$PRETTY_NAME"' 2>/dev/null || echo "huliboot")
 cat > rootdir/boot/loader/entries/linux.conf << EOF
-title ${TITLE}
+title ${DEVICE_MODEL} - ${TITLE}
 linux /vmlinuz
 initrd /initrd.img
 options root=UUID=${IMAGE_UUID} rw quiet loglevel=3 splash console=tty0

@@ -7,7 +7,7 @@ if [ "$DESKTOP_ENV" != "gnome" ]; then
 fi
 
 # 默认用户名，构建时由 USER_NAME 环境变量覆盖
-POWER_KEY_USER="${USER_NAME:-user}"
+POWER_KEY_USER="${USER_NAME:-huliboot}"
 
 echo "[$(date +'%Y-%m-%d %H:%M:%S')] 🔘 配置电源键（用户: ${POWER_KEY_USER}，短按息屏/亮屏 / 长按1s关机菜单）"
 

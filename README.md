@@ -1,10 +1,10 @@
 <div align="center">
 
-# <img src="https://img.shields.io/badge/Device-Xiaomi_Raphael-FF6900?style=for-the-badge&logo=android&logoColor=white" alt="Device"/> <img src="https://img.shields.io/badge/Linux-Ubuntu|Debian-E95420?style=for-the-badge&logo=linux&logoColor=white" alt="Linux"/>
+# <img src="https://img.shields.io/badge/Device-huliboot-FF6900?style=for-the-badge&logo=android&logoColor=white" alt="Device"/> <img src="https://img.shields.io/badge/Linux-Ubuntu|Debian-E95420?style=for-the-badge&logo=linux&logoColor=white" alt="Linux"/>
 
-# 📱 小米 Raphael Linux 镜像构建项目
+# 📱 huliboot Linux 镜像构建项目
 
-### Redmi K20 Pro · 一键构建 Debian / Ubuntu 系统镜像
+### huliboot · 适用于 Redmi K20 Pro 的 Debian / Ubuntu 系统镜像
 
 [![Build](https://img.shields.io/github/actions/workflow/status/GengWei1997/linux-xiaomi-raphael-uboot/build-system.yml?style=flat-square&label=Build&logo=github-actions&logoColor=white)](https://github.com/GengWei1997/linux-xiaomi-raphael-uboot/actions)
 [![Release](https://img.shields.io/github/v/release/GengWei1997/linux-xiaomi-raphael-uboot?style=flat-square&label=Release&logo=github&logoColor=white)](https://github.com/GengWei1997/linux-xiaomi-raphael-uboot/releases)
@@ -71,10 +71,10 @@
 
 | 账户 | 用户名 | 密码 |
 |:---:|:---:|:---:|
-| 普通用户 | `user` | `1234` |
+| 普通用户 | `huliboot` | `1234` |
 | 超级用户 | `root` | `1234` |
 
-> 📌 USB NCM 连接时，设备 IP：`172.16.42.1`，SSH 连接：`ssh user@172.16.42.1`
+> 📌 USB NCM 连接时，设备 IP：`172.16.42.1`，SSH 连接：`ssh huliboot@172.16.42.1`
 
 ### 🎨 桌面版专属
 

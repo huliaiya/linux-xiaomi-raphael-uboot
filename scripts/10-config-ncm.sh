@@ -26,8 +26,8 @@ echo 0x1d6b > $G/idVendor
 echo 0x0104 > $G/idProduct
 echo 0x0200 > $G/bcdUSB
 mkdir -p $G/strings/0x409
-echo xiaomi-raphael > $G/strings/0x409/manufacturer
-echo NCM > $G/strings/0x409/product
+echo huliboot > $G/strings/0x409/manufacturer
+echo huliboot > $G/strings/0x409/product
 echo $(cat /etc/machine-id) > $G/strings/0x409/serialnumber
 mkdir -p $G/configs/c.1
 mkdir -p $G/configs/c.1/strings/0x409

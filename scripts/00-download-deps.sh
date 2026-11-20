@@ -11,21 +11,21 @@ echo "仓库: $REPO"
 mkdir -p xiaomi-raphael-debs_$KERNEL_VERSION
 
 echo "正在下载内核包..."
-curl -sL -o xiaomi-raphael-debs_$KERNEL_VERSION/linux-image-xiaomi-raphael.deb \
+curl -fsSL -o xiaomi-raphael-debs_$KERNEL_VERSION/linux-image-xiaomi-raphael.deb \
     "https://github.com/$REPO/releases/download/kernel-v$KERNEL_VERSION/linux-image-xiaomi-raphael.deb"
 
-curl -sL -o xiaomi-raphael-debs_$KERNEL_VERSION/linux-headers-xiaomi-raphael.deb \
+curl -fsSL -o xiaomi-raphael-debs_$KERNEL_VERSION/linux-headers-xiaomi-raphael.deb \
     "https://github.com/$REPO/releases/download/kernel-v$KERNEL_VERSION/linux-headers-xiaomi-raphael.deb"
 
-curl -sL -o xiaomi-raphael-debs_$KERNEL_VERSION/firmware-xiaomi-raphael.deb \
+curl -fsSL -o xiaomi-raphael-debs_$KERNEL_VERSION/firmware-xiaomi-raphael.deb \
     "https://github.com/$REPO/releases/download/kernel-v$KERNEL_VERSION/firmware-xiaomi-raphael.deb"
 
-curl -sL -o xiaomi-raphael-debs_$KERNEL_VERSION/alsa-xiaomi-raphael.deb \
+curl -fsSL -o xiaomi-raphael-debs_$KERNEL_VERSION/alsa-xiaomi-raphael.deb \
     "https://github.com/$REPO/releases/download/kernel-v$KERNEL_VERSION/alsa-xiaomi-raphael.deb"
 
 echo ""
 echo "下载 Venus VAAPI 驱动源码 (snowf14k3/venus-vaapi-driver)..."
-curl -sL -o xiaomi-raphael-debs_$KERNEL_VERSION/venus-vaapi-driver.tar.gz \
+curl -fsSL -o xiaomi-raphael-debs_$KERNEL_VERSION/venus-vaapi-driver.tar.gz \
     "https://github.com/snowf14k3/venus-vaapi-driver/archive/refs/heads/main.tar.gz"
 
 echo ""
