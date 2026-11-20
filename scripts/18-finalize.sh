@@ -17,8 +17,14 @@ rm -d rootdir 2>/dev/null || true
 echo "[$(date +'%Y-%m-%d %H:%M:%S')]   └─ 检查 root 分区 (p2) 并设置固定 UUID..."
 LOOP_DEV=$(losetup -j "$(readlink -f "${IMAGE_NAME}")" -l --raw -n -O NAME | head -1)
 if [ -n "${LOOP_DEV}" ] && [ -e "${LOOP_DEV}p2" ]; then
-    e2fsck -f -y ${LOOP_DEV}p2
-    tune2fs -U ${IMAGE_UUID} ${LOOP_DEV}p2
+    # 返回码 1 表示文件系统错误已修复，不应中断构建。
+    e2fsck_status=0
+    e2fsck -f -y "${LOOP_DEV}p2" || e2fsck_status=$?
+    if [ "${e2fsck_status}" -gt 1 ]; then
+        echo "错误: e2fsck 检查失败 (返回码: ${e2fsck_status})" >&2
+        exit "${e2fsck_status}"
+    fi
+    tune2fs -U "${IMAGE_UUID}" "${LOOP_DEV}p2"
     echo "[$(date +'%Y-%m-%d %H:%M:%S')]   └─ 卸载当前镜像的 loop 设备"
     cleanup_image_loop
 else
